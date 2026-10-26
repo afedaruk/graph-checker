@@ -5,7 +5,6 @@ export default function Vertex({
   y,
   id,
   containerRef,
-  label,
   onVertexClick,
   onRightClick,
 }) {

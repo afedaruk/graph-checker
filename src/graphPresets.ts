@@ -1,4 +1,11 @@
-export const GRAPH_PRESETS = {
+import { Vertex, Edge } from "./graph";
+
+export type GraphPreset = {
+  vertices: Record<string, Vertex>;
+  edges: Record<string, Edge>;
+};
+
+export const GRAPH_PRESETS: Record<string, GraphPreset> = {
   Star: {
     vertices: {
       1: { id: "1", x: 1010, y: 162, edges: 2 },
