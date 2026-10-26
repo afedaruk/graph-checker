@@ -186,10 +186,6 @@ class Graph {
       edgeIdByVertices.set(edgeString2, edge.id);
     });
 
-    /*for (let [u, neighbors] of Object.entries(graph)) {
-      adj.set(u, [...neighbors]);
-      }*/
-
     let oddVertices = [];
     let startVertex = null;
     for (let [u, neighbors] of adj) {
@@ -239,7 +235,12 @@ class Graph {
         circuit.push(currentPath.pop());
       }
     }
-
+    if (circuit.length !== Object.keys(this.edges).length + 1) {
+      this.isEulerian = this.NON_EULERIAN;
+      this.areEdgesLabeled = true;
+      this.notify();
+      return;
+    }
     let prevVertexId: string = circuit[0]!;
     const updatedEdges: Record<string, Edge> = {};
     for (let orderNumber = 1; orderNumber < circuit.length; orderNumber++) {
@@ -257,6 +258,7 @@ class Graph {
     this.edges = updatedEdges;
     this.areEdgesLabeled = true;
     this.notify();
+    console.log(this.edges);
     return circuit.reverse();
   };
 }
