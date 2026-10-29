@@ -23,4 +23,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # not related to the codebase
-/logos
+/etc
