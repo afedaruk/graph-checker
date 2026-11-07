@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/graph-checker/static/css/main.208ef583.css",
+    "main.js": "/graph-checker/static/js/main.1309f76e.js",
+    "index.html": "/graph-checker/index.html",
+    "main.208ef583.css.map": "/graph-checker/static/css/main.208ef583.css.map",
+    "main.1309f76e.js.map": "/graph-checker/static/js/main.1309f76e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.208ef583.css",
+    "static/js/main.1309f76e.js"
+  ]
+}
