@@ -1,6 +1,7 @@
 # Try it out!
 
 The project is hosted at https://afedaruk.github.io/graph-checker
+Left-click anywhere to create a vertex, and left-click on a vertex to start connecting with an edge. Right-click removes both edges and vertices.
 
 # Getting Started with Create React App
 
