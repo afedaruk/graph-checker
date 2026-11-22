@@ -59,6 +59,7 @@ export default function GraphContainer() {
   return (
     <div
       id="global-container"
+      ref={containerRef}
       style={{
         overflowX: "hidden",
       }}
@@ -67,6 +68,7 @@ export default function GraphContainer() {
         id="graph-container"
         onClick={handleMouseClick}
         onContextMenu={handleRightClick}
+        ref={containerRef}
         className="graph-container"
       >
         <svg className="svg-layer">

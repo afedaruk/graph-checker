@@ -11,8 +11,8 @@ export const GRAPH_PRESETS: Record<string, GraphPreset> = {
       1: { id: "1", x: 0, y: -228.6, edges: 2 },
       2: { id: "2", x: 237, y: -77.6, edges: 2 },
       3: { id: "3", x: 156, y: 193.4, edges: 2 },
-      4: { id: "4", x: -158, y: 180.4, edges: 2 },
-      5: { id: "5", x: -235, y: -67.6, edges: 2 },
+      4: { id: "4", x: -158, y: 193.4, edges: 2 },
+      5: { id: "5", x: -235, y: -77.6, edges: 2 },
     },
     edges: {
       1: { id: "1", vertex1Id: "1", vertex2Id: "3", label: "" },
