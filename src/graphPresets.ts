@@ -8,11 +8,11 @@ export type GraphPreset = {
 export const GRAPH_PRESETS: Record<string, GraphPreset> = {
   Star: {
     vertices: {
-      1: { id: "1", x: 1010, y: 162, edges: 2 },
-      2: { id: "2", x: 1247, y: 313, edges: 2 },
-      3: { id: "3", x: 1166, y: 584, edges: 2 },
-      4: { id: "4", x: 852, y: 571, edges: 2 },
-      5: { id: "5", x: 775, y: 323, edges: 2 },
+      1: { id: "1", x: 0, y: -228.6, edges: 2 },
+      2: { id: "2", x: 237, y: -77.6, edges: 2 },
+      3: { id: "3", x: 156, y: 193.4, edges: 2 },
+      4: { id: "4", x: -158, y: 180.4, edges: 2 },
+      5: { id: "5", x: -235, y: -67.6, edges: 2 },
     },
     edges: {
       1: { id: "1", vertex1Id: "1", vertex2Id: "3", label: "" },
@@ -24,12 +24,12 @@ export const GRAPH_PRESETS: Record<string, GraphPreset> = {
   },
   AdjacentSquares: {
     vertices: {
-      1: { id: "1", x: 700, y: 200, edges: 2 },
-      2: { id: "2", x: 1000, y: 200, edges: 3 },
-      3: { id: "3", x: 1300, y: 200, edges: 2 },
-      4: { id: "4", x: 1300, y: 500, edges: 2 },
-      5: { id: "5", x: 1000, y: 500, edges: 3 },
-      6: { id: "6", x: 700, y: 500, edges: 2 },
+      1: { id: "1", x: -300, y: -150, edges: 2 },
+      2: { id: "2", x: 0, y: -150, edges: 3 },
+      3: { id: "3", x: 300, y: -150, edges: 2 },
+      4: { id: "4", x: 300, y: 150, edges: 2 },
+      5: { id: "5", x: 0, y: 150, edges: 3 },
+      6: { id: "6", x: -300, y: 150, edges: 2 },
     },
     edges: {
       1: { id: "1", vertex1Id: "1", vertex2Id: "2", label: "" },
@@ -43,11 +43,11 @@ export const GRAPH_PRESETS: Record<string, GraphPreset> = {
   },
   Tree: {
     vertices: {
-      1: { id: "1", x: 1000, y: 200, edges: 3 },
-      2: { id: "2", x: 800, y: 400, edges: 1 },
-      3: { id: "3", x: 1000, y: 400, edges: 2 },
-      4: { id: "4", x: 1200, y: 400, edges: 1 },
-      5: { id: "5", x: 1000, y: 600, edges: 1 },
+      1: { id: "1", x: 0, y: -200, edges: 3 },
+      2: { id: "2", x: -200, y: 0, edges: 1 },
+      3: { id: "3", x: 0, y: 0, edges: 2 },
+      4: { id: "4", x: 200, y: 0, edges: 1 },
+      5: { id: "5", x: 0, y: 200, edges: 1 },
     },
     edges: {
       1: { id: "1", vertex1Id: "1", vertex2Id: "2", label: "" },

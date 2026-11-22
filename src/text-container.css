@@ -25,9 +25,24 @@
 
 .pop-up {
   height: 20px;
-  top: 4vh;
+  top: 3vh;
   left: 50%;
   width: fit-content;
   transform: translate(-50%, -50%);
   position: absolute;
+}
+
+.info-button {
+  position: absolute;
+  top: 1vh;
+  left: 1vh;
+  min-width: 35px;
+  min-height: 35px;
+  z-index: 9999;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  border-radius: 10px;
+  white-space: pre-line;
 }

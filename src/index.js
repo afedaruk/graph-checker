@@ -1,4 +1,9 @@
-import React, { useState, useRef, useSyncExternalStore } from "react";
+import React, {
+  useState,
+  useRef,
+  useSyncExternalStore,
+  useEffect,
+} from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 
@@ -7,6 +12,7 @@ import VertexLinker from "./vertexLinker.js";
 import Edge from "./edge";
 import GraphManagingButton from "./graphManagingButton.js";
 import graph from "./graph.ts";
+import InfoButton from "./infoButton.js";
 
 import "./text-container.css";
 import "./index.css";
@@ -35,6 +41,20 @@ export default function GraphContainer() {
     event.preventDefault();
     event.stopPropagation();
   };
+
+  const [windowCenterX, setWindowCenterX] = useState(0);
+  const [windowCenterY, setWindowCenterY] = useState(0);
+
+  useEffect(() => {
+    function handleResize() {
+      const { innerWidth: width, innerHeight: height } = window;
+      setWindowCenterX(width / 2);
+      setWindowCenterY(height / 2);
+    }
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+  }, []);
 
   return (
     <div
@@ -94,6 +114,8 @@ export default function GraphContainer() {
           {isEulerian}
         </div>
       )}
+      <InfoButton onClickAction={graph.clearEdgeLabels} />
+
       <div className="button-container">
         <GraphManagingButton
           onClickAction={() => {
@@ -107,19 +129,23 @@ export default function GraphContainer() {
         />
         <GraphManagingButton
           onClickAction={() => {
-            graph.loadFromPreset("Star");
+            graph.loadFromPreset("Star", windowCenterX, windowCenterY);
           }}
           buttonText="star graph"
         />
         <GraphManagingButton
           onClickAction={() => {
-            graph.loadFromPreset("AdjacentSquares");
+            graph.loadFromPreset(
+              "AdjacentSquares",
+              windowCenterX,
+              windowCenterY,
+            );
           }}
           buttonText="adjacent squares graph"
         />
         <GraphManagingButton
           onClickAction={() => {
-            graph.loadFromPreset("Tree");
+            graph.loadFromPreset("Tree", windowCenterX, windowCenterY);
           }}
           buttonText="tree graph"
         />

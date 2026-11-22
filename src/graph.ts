@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import { GRAPH_PRESETS } from "./graphPresets.ts";
+import { relative } from "node:path";
 
 export interface Vertex {
   id: string;
@@ -85,9 +86,23 @@ class Graph {
     }
   };
 
-  loadFromPreset = (presetName: string) => {
-    this.vertices = GRAPH_PRESETS[presetName].vertices;
-    this.edges = GRAPH_PRESETS[presetName].edges;
+  loadFromPreset = (
+    presetName: string,
+    windowCenterX: number,
+    windowCenterY: number,
+  ) => {
+    const preset = GRAPH_PRESETS[presetName];
+    this.vertices = Object.fromEntries(
+      Object.entries(preset.vertices).map(([id, vertex]) => [
+        id,
+        {
+          ...vertex,
+          x: vertex.x + windowCenterX,
+          y: vertex.y + windowCenterY,
+        },
+      ]),
+    );
+    this.edges = preset.edges;
     this.clearEdgeLabels();
     this.notify();
   };
@@ -199,10 +214,12 @@ class Graph {
     switch (oddVertices.length) {
       case 0:
         this.isEulerian = this.EULERIAN;
+        this.notify();
         break;
       case 2:
         this.isEulerian = this.SEMI_EULERIAN;
         startVertex = oddVertices[0];
+        this.notify();
         break;
       default:
         this.isEulerian = this.NON_EULERIAN;
