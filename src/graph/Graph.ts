@@ -51,6 +51,7 @@ class Graph {
   private areEdgesLabeled = false;
   private isLinkingActive = false;
   private firstLinkingVertexId = "0";
+  private draggedVertexInitialPosition = { x: Number(null), y: Number(null) };
   private readonly NON_EULERIAN = "non-eulerian";
   private readonly SEMI_EULERIAN = "semi-eulerian";
   private readonly EULERIAN = "eulerian";
@@ -178,6 +179,41 @@ class Graph {
     this.history.push({ action: Action.ADD_EDGE, edge });
     this.undoneHistory = [];
     console.log(Action.ADD_EDGE);
+  };
+
+  setVertexPosition = (
+    id: string,
+    x: number,
+    y: number,
+    dragEnded: boolean,
+  ) => {
+    const vertex = {
+      ...this.vertices[id],
+      x: x,
+      y: y,
+    };
+    if (this.draggedVertexInitialPosition.x === Number(null)) {
+      this.draggedVertexInitialPosition.x = x;
+      this.draggedVertexInitialPosition.y = y;
+    }
+    if (dragEnded) {
+      this.history.push({
+        action: Action.MOVE_VERTEX,
+        vertex: vertex,
+        xBefore: this.draggedVertexInitialPosition.x,
+        yBefore: this.draggedVertexInitialPosition.y,
+      });
+      this.draggedVertexInitialPosition.x = Number(null);
+      this.draggedVertexInitialPosition.y = Number(null);
+    }
+    vertex.x = x;
+    vertex.y = y;
+    this.vertices = {
+      ...this.vertices,
+      [id]: vertex,
+    };
+    this.clearEdgeLabels();
+    this.notify();
   };
 
   startLinkingVertices = (vertexId: string) => {
@@ -336,6 +372,17 @@ class Graph {
       case Action.DELETE_VERTEX:
         this.undoDeleteVertex(historyEntry.vertex);
         break;
+      case Action.MOVE_VERTEX:
+        const newHistoryEntryXBefore = historyEntry.vertex.x;
+        const newHistoryEntryYBefore = historyEntry.vertex.y;
+        this.undoMoveVertex(
+          historyEntry.vertex,
+          historyEntry.xBefore,
+          historyEntry.yBefore,
+        );
+        historyEntry.xBefore = newHistoryEntryXBefore;
+        historyEntry.yBefore = newHistoryEntryYBefore;
+        break;
       case Action.ADD_EDGE:
         this.undoAddEdge(historyEntry.edge);
         break;
@@ -404,6 +451,17 @@ class Graph {
     this.notify();
   };
 
+  undoMoveVertex = (vertex: Vertex, xBefore: number, yBefore: number) => {
+    vertex.x = xBefore;
+    vertex.y = yBefore;
+    this.vertices = {
+      ...this.vertices,
+      [vertex.id]: vertex,
+    };
+    this.clearEdgeLabels();
+    this.notify();
+  };
+
   redoLastAction = () => {
     if (this.undoneHistory.length == 0) return;
     const historyEntry: HistoryEntry = this.undoneHistory.pop()!;
@@ -413,6 +471,17 @@ class Graph {
         break;
       case Action.DELETE_VERTEX:
         this.undoAddVertex(historyEntry.vertex);
+        break;
+      case Action.MOVE_VERTEX:
+        const newHistoryEntryXBefore = historyEntry.vertex.x;
+        const newHistoryEntryYBefore = historyEntry.vertex.y;
+        this.undoMoveVertex(
+          historyEntry.vertex,
+          historyEntry.xBefore,
+          historyEntry.yBefore,
+        );
+        historyEntry.xBefore = newHistoryEntryXBefore;
+        historyEntry.yBefore = newHistoryEntryYBefore;
         break;
       case Action.ADD_EDGE:
         this.undoDeleteEdge(historyEntry.edge);

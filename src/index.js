@@ -123,6 +123,9 @@ export default function GraphContainer() {
               containerRef={containerRef}
               onVertexClick={graph.startLinkingVertices}
               onRightClick={graph.deleteVertex}
+              setOwnPosition={(x, y, updateHistory) => {
+                graph.setVertexPosition(vertex.id, x, y, updateHistory);
+              }}
             />
           ))}
         </svg>
