@@ -1,0 +1,17 @@
+.vertex {
+  cursor: pointer;
+  pointer-events: all;
+  fill: #50808e;
+  transition: r 0.15s ease;
+  r: 15px;
+}
+
+.vertex:hover {
+  r: 18px;
+}
+
+.vertex-hitbox {
+  fill: #84b59f;
+  r: 18px;
+  pointer-events: all;
+}

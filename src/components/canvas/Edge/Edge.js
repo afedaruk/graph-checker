@@ -1,4 +1,4 @@
-import "./edge.css";
+import "./Edge.css";
 
 export default function Edge({ x1, y1, x2, y2, id, onEdgeClick, label }) {
   const ARROW_LENGTH = 50;
@@ -61,13 +61,14 @@ export default function Edge({ x1, y1, x2, y2, id, onEdgeClick, label }) {
       <defs>
         <marker
           id="arrowhead"
-          markerWidth="10"
-          markerHeight="7"
-          refX="9"
-          refY="3.5"
+          markerUnits="userSpaceOnUse"
+          markerWidth="50"
+          markerHeight="35"
+          refX="45"
+          refY="17.5"
           orient="auto"
         >
-          <polygon points="0 0, 10 3.5, 0 7" fill="#84B59F" />
+          <polygon points="0 0, 50 17.5, 0 35" fill="#84B59F" />
         </marker>
       </defs>
       <text

@@ -1,0 +1,14 @@
+.edge {
+  stroke: #84b59f;
+  stroke-width: 5px;
+  transition: stroke-width 0.1s ease;
+}
+
+.edge:hover {
+  stroke-width: 8px;
+}
+
+.vertex-linker {
+  stroke: #84b59f;
+  stroke-width: 5px;
+}

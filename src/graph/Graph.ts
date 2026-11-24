@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom/client";
-import { GRAPH_PRESETS } from "./graphPresets.ts";
+import { GRAPH_PRESETS } from "./GraphPresets.ts";
 import { relative } from "node:path";
+import { Action } from "./types.ts";
+import Vertex from "../components/canvas/Vertex/Vertex.js";
 
 export interface Vertex {
   id: string;
@@ -19,12 +21,31 @@ export interface Edge {
 
 export interface AdjacencyVertex {}
 
+type HistoryEntry =
+  | { action: Action.ADD_VERTEX; vertex: Vertex }
+  | { action: Action.DELETE_VERTEX; vertex: Vertex }
+  | { action: Action.ADD_EDGE; edge: Edge }
+  | { action: Action.DELETE_EDGE; edge: Edge }
+  | {
+      action: Action.MOVE_VERTEX;
+      vertex: Vertex;
+      xBefore: number;
+      yBefore: number;
+    }
+  | {
+      action: Action.CLEAR_GRAPH;
+      vertices: Record<string, Vertex>;
+      edges: Record<string, Edge>;
+    };
+
 class Graph {
   private vertices: Record<string, Vertex> = {};
-  private edges: Record<string, Edge> = {};
-  private listeners: Set<() => void> = new Set();
   // {"1698000000": { id: "1698000000", x: 100, y: 150, edges: 0, label: 0 }}
+  private edges: Record<string, Edge> = {};
   // {"1698000000": { id: "1698000000", vertex1Id: 0, vertex2Id: 1, label: "" }}
+  private listeners: Set<() => void> = new Set();
+  private history: Array<HistoryEntry> = [];
+  private undoneHistory: Array<HistoryEntry> = [];
 
   private isEulerian = "";
   private areEdgesLabeled = false;
@@ -62,9 +83,16 @@ class Graph {
 
   clearGraph = () => {
     this.clearEdgeLabels();
+    this.history.push({
+      action: Action.CLEAR_GRAPH,
+      vertices: { ...this.vertices },
+      edges: { ...this.edges },
+    });
+    this.undoneHistory = [];
     this.vertices = {};
     this.edges = {};
     this.notify();
+    console.log(Action.CLEAR_GRAPH);
   };
 
   clearEdgeLabels = () => {
@@ -92,6 +120,7 @@ class Graph {
     windowCenterY: number,
   ) => {
     const preset = GRAPH_PRESETS[presetName];
+    this.clearGraph();
     this.vertices = Object.fromEntries(
       Object.entries(preset.vertices).map(([id, vertex]) => [
         id,
@@ -107,42 +136,54 @@ class Graph {
     this.notify();
   };
 
-  createVertex = (x: number, y: number) => {
+  addVertex = (x: number, y: number) => {
     const id = Date.now().toString();
+    const vertex = {
+      id,
+      x,
+      y,
+      edges: 0,
+    };
     this.vertices = {
       ...this.vertices,
-      [id]: {
-        id,
-        x,
-        y,
-        edges: 0,
-      },
+      [vertex.id]: vertex,
     };
     this.clearEdgeLabels();
     this.notify();
+    this.history.push({ action: Action.ADD_VERTEX, vertex: vertex });
+    this.undoneHistory = [];
+    console.log(Action.ADD_VERTEX);
   };
 
-  createEdge = (vertex1Id: string, vertex2Id: string) => {
+  addEdge = (vertex1Id: string, vertex2Id: string) => {
+    const existingEdge = Object.values(this.edges).find(
+      (e) => e.vertex1Id === vertex1Id && e.vertex2Id === vertex2Id,
+    );
+    if (existingEdge != null) return;
     const id = Date.now().toString();
     this.vertices[vertex1Id].edges++;
     this.vertices[vertex2Id].edges++;
+    const edge = {
+      id,
+      vertex1Id,
+      vertex2Id,
+      label: "",
+    };
     this.edges = {
       ...this.edges,
-      [id]: {
-        id,
-        vertex1Id,
-        vertex2Id,
-        label: "",
-      },
+      [id]: edge,
     };
     this.clearEdgeLabels();
     this.notify();
+    this.history.push({ action: Action.ADD_EDGE, edge });
+    this.undoneHistory = [];
+    console.log(Action.ADD_EDGE);
   };
 
   startLinkingVertices = (vertexId: string) => {
     if (this.isLinkingActive) {
       if (vertexId != this.firstLinkingVertexId) {
-        this.createEdge(this.firstLinkingVertexId, vertexId);
+        this.addEdge(this.firstLinkingVertexId, vertexId);
       }
     } else {
       this.firstLinkingVertexId = vertexId;
@@ -169,6 +210,9 @@ class Graph {
     this.edges = updatedEdges;
     this.clearEdgeLabels();
     this.notify();
+    this.history.push({ action: Action.DELETE_EDGE, edge: deletedEdge });
+    this.undoneHistory = [];
+    console.log(Action.DELETE_EDGE);
   };
 
   deleteVertex = (vertexId: string) => {
@@ -184,6 +228,9 @@ class Graph {
     this.vertices = updatedVertices;
     this.clearEdgeLabels();
     this.notify();
+    this.history.push({ action: Action.DELETE_VERTEX, vertex: deletedVertex });
+    this.undoneHistory = [];
+    console.log(Action.DELETE_VERTEX);
   };
 
   findEulerCircuit = () => {
@@ -240,11 +287,11 @@ class Graph {
       if (neighbors && neighbors.length > 0) {
         const v: string = neighbors.pop()!;
 
-        let reverseNeighbors = adj.get(v);
-        if (reverseNeighbors) {
-          let reverseIndex = reverseNeighbors.indexOf(u);
-          if (reverseIndex !== -1) {
-            reverseNeighbors.splice(reverseIndex, 1);
+        let undoNeighbors = adj.get(v);
+        if (undoNeighbors) {
+          let undoIndex = undoNeighbors.indexOf(u);
+          if (undoIndex !== -1) {
+            undoNeighbors.splice(undoIndex, 1);
           }
         }
         currentPath.push(v);
@@ -275,8 +322,112 @@ class Graph {
     this.edges = updatedEdges;
     this.areEdgesLabeled = true;
     this.notify();
-    console.log(this.edges);
     return circuit.reverse();
+  };
+
+  undoLastAction = () => {
+    if (this.history.length == 0) return;
+    const historyEntry: HistoryEntry = this.history.pop()!;
+    console.log(historyEntry);
+    switch (historyEntry.action) {
+      case Action.ADD_VERTEX:
+        this.undoAddVertex(historyEntry.vertex);
+        break;
+      case Action.DELETE_VERTEX:
+        this.undoDeleteVertex(historyEntry.vertex);
+        break;
+      case Action.ADD_EDGE:
+        this.undoAddEdge(historyEntry.edge);
+        break;
+      case Action.DELETE_EDGE:
+        this.undoDeleteEdge(historyEntry.edge);
+        break;
+      case Action.CLEAR_GRAPH:
+        const newHistoryEntryVertices = this.vertices;
+        const newHistoryEntryEdges = this.edges;
+        this.undoClearGraph(historyEntry.vertices, historyEntry.edges);
+        historyEntry.vertices = newHistoryEntryVertices;
+        historyEntry.edges = newHistoryEntryEdges;
+    }
+    this.undoneHistory.push(historyEntry);
+    console.log("undone history", this.undoneHistory);
+  };
+
+  undoDeleteVertex = (vertex: Vertex) => {
+    this.vertices = {
+      ...this.vertices,
+      [vertex.id]: vertex,
+    };
+    this.clearEdgeLabels();
+    this.notify();
+  };
+
+  undoAddVertex = (vertex: Vertex) => {
+    if (this.isLinkingActive && this.firstLinkingVertexId == vertex.id) {
+      this.isLinkingActive = false;
+    }
+    const { [vertex.id]: deletedVertex, ...updatedVertices } = this.vertices;
+    this.vertices = updatedVertices;
+    this.clearEdgeLabels();
+    this.notify();
+  };
+
+  undoDeleteEdge = (edge: Edge) => {
+    this.vertices[edge.vertex1Id].edges++;
+    this.vertices[edge.vertex2Id].edges++;
+    this.edges = {
+      ...this.edges,
+      [edge.id]: edge,
+    };
+    this.clearEdgeLabels();
+    this.notify();
+  };
+
+  undoAddEdge = (edge: Edge) => {
+    const vertex1Id = edge.vertex1Id;
+    const vertex2Id = edge.vertex2Id;
+    this.vertices[vertex1Id].edges--;
+    this.vertices[vertex2Id].edges--;
+    const { [edge.id]: deletedEdge, ...updatedEdges } = this.edges;
+    this.edges = updatedEdges;
+    this.clearEdgeLabels();
+    this.notify();
+  };
+
+  undoClearGraph = (
+    vertices: Record<string, Vertex>,
+    edges: Record<string, Edge>,
+  ) => {
+    this.vertices = vertices;
+    this.edges = edges;
+    this.clearEdgeLabels();
+    this.notify();
+  };
+
+  redoLastAction = () => {
+    if (this.undoneHistory.length == 0) return;
+    const historyEntry: HistoryEntry = this.undoneHistory.pop()!;
+    switch (historyEntry.action) {
+      case Action.ADD_VERTEX:
+        this.undoDeleteVertex(historyEntry.vertex);
+        break;
+      case Action.DELETE_VERTEX:
+        this.undoAddVertex(historyEntry.vertex);
+        break;
+      case Action.ADD_EDGE:
+        this.undoDeleteEdge(historyEntry.edge);
+        break;
+      case Action.DELETE_EDGE:
+        this.undoAddEdge(historyEntry.edge);
+        break;
+      case Action.CLEAR_GRAPH:
+        const newHistoryEntryVertices = this.vertices;
+        const newHistoryEntryEdges = this.edges;
+        this.undoClearGraph(historyEntry.vertices, historyEntry.edges);
+        historyEntry.vertices = newHistoryEntryVertices;
+        historyEntry.edges = newHistoryEntryEdges;
+    }
+    this.history.push(historyEntry);
   };
 }
 

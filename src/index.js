@@ -7,15 +7,16 @@ import React, {
 import ReactDOM from "react-dom/client";
 import App from "./App";
 
-import Vertex from "./vertex.js";
-import VertexLinker from "./vertexLinker.js";
-import Edge from "./edge";
-import GraphManagingButton from "./graphManagingButton.js";
-import graph from "./graph.ts";
-import InfoButton from "./infoButton.js";
+import Vertex from "./components/canvas/Vertex/Vertex.js";
+import VertexLinker from "./components/canvas/VertexLinker.js";
+import Edge from "./components/canvas/Edge/Edge.js";
+import GraphManagingButton from "./components/ui/GraphManagingButton.js";
+import graph from "./graph/Graph.ts";
+import InfoButton from "./components/ui/InfoButton.js";
 
-import "./text-container.css";
+import "./components/ui/text-container.css";
 import "./index.css";
+import GraphPresetButton from "./components/ui/GraphPresetButton.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -33,7 +34,7 @@ export default function GraphContainer() {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    graph.createVertex(x, y);
+    graph.addVertex(x, y);
   };
 
   const handleRightClick = (event) => {
@@ -56,10 +57,29 @@ export default function GraphContainer() {
     handleResize();
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      const isKeyCombination =
+        (event.ctrlKey || event.metaKey) && !event.shiftKey;
+      const letterIsZ = event.key.toLowerCase() === "z";
+      const letterIsY = event.key.toLowerCase() === "y";
+      if (isKeyCombination && letterIsZ) {
+        event.preventDefault();
+        graph.undoLastAction();
+      }
+      if (isKeyCombination && letterIsY) {
+        event.preventDefault();
+        graph.redoLastAction();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [graph]);
+
   return (
     <div
       id="global-container"
-      ref={containerRef}
       style={{
         overflowX: "hidden",
       }}
@@ -117,6 +137,30 @@ export default function GraphContainer() {
         </div>
       )}
       <InfoButton onClickAction={graph.clearEdgeLabels} />
+      <div className="preset-button-container">
+        <GraphPresetButton
+          onClickAction={() => {
+            graph.loadFromPreset("Star", windowCenterX, windowCenterY);
+          }}
+          img={`${process.env.PUBLIC_URL}/preset_buttons/star.png`}
+        />
+        <GraphPresetButton
+          onClickAction={() => {
+            graph.loadFromPreset(
+              "AdjacentSquares",
+              windowCenterX,
+              windowCenterY,
+            );
+          }}
+          img={`${process.env.PUBLIC_URL}/preset_buttons/squares.png`}
+        />
+        <GraphPresetButton
+          onClickAction={() => {
+            graph.loadFromPreset("Tree", windowCenterX, windowCenterY);
+          }}
+          img={`${process.env.PUBLIC_URL}/preset_buttons/tree.png`}
+        />
+      </div>
 
       <div className="button-container">
         <GraphManagingButton
@@ -131,25 +175,15 @@ export default function GraphContainer() {
         />
         <GraphManagingButton
           onClickAction={() => {
-            graph.loadFromPreset("Star", windowCenterX, windowCenterY);
+            graph.undoLastAction();
           }}
-          buttonText="star graph"
+          buttonText="↶"
         />
         <GraphManagingButton
           onClickAction={() => {
-            graph.loadFromPreset(
-              "AdjacentSquares",
-              windowCenterX,
-              windowCenterY,
-            );
+            graph.redoLastAction();
           }}
-          buttonText="adjacent squares graph"
-        />
-        <GraphManagingButton
-          onClickAction={() => {
-            graph.loadFromPreset("Tree", windowCenterX, windowCenterY);
-          }}
-          buttonText="tree graph"
+          buttonText="↷"
         />
       </div>
     </div>

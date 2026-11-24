@@ -1,4 +1,4 @@
-import { Vertex, Edge } from "./graph";
+import { Vertex, Edge } from "./Graph";
 
 export type GraphPreset = {
   vertices: Record<string, Vertex>;

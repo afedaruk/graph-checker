@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./edge.css";
+import "./Edge/Edge.css";
 
 export default function VertexLinker({ anchorX, anchorY, containerRef }) {
   const [cursor, setCursor] = useState({ x: anchorX, y: anchorY });
@@ -20,7 +20,7 @@ export default function VertexLinker({ anchorX, anchorY, containerRef }) {
   }, []);
   return (
     <line
-      className="edge"
+      className="vertex-linker"
       x1={anchorX}
       y1={anchorY}
       x2={cursor.x}
