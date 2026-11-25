@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import ReactDOM from "react-dom/client";
 import { GRAPH_PRESETS } from "./GraphPresets.ts";
 import { relative } from "node:path";
-import { Action } from "./types.ts";
+import { Action, EulerianStatus } from "./types.ts";
 import Vertex from "../components/canvas/Vertex/Vertex.js";
 
 export interface Vertex {
@@ -38,7 +38,7 @@ type HistoryEntry =
       edges: Record<string, Edge>;
     };
 
-class Graph {
+export class Graph {
   private vertices: Record<string, Vertex> = {};
   // {"1698000000": { id: "1698000000", x: 100, y: 150, edges: 0, label: 0 }}
   private edges: Record<string, Edge> = {};
@@ -47,14 +47,11 @@ class Graph {
   private history: Array<HistoryEntry> = [];
   private undoneHistory: Array<HistoryEntry> = [];
 
-  private isEulerian = "";
+  private isEulerian: EulerianStatus = EulerianStatus.UNDETERMINED;
   private areEdgesLabeled = false;
   private isLinkingActive = false;
   private firstLinkingVertexId = "0";
   private draggedVertexInitialPosition = { x: Number(null), y: Number(null) };
-  private readonly NON_EULERIAN = "non-eulerian";
-  private readonly SEMI_EULERIAN = "semi-eulerian";
-  private readonly EULERIAN = "eulerian";
 
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
@@ -97,6 +94,7 @@ class Graph {
   };
 
   clearEdgeLabels = () => {
+    this.isEulerian = EulerianStatus.UNDETERMINED;
     if (this.areEdgesLabeled) {
       const newEdges: Record<string, Edge> = {};
 
@@ -107,12 +105,9 @@ class Graph {
         };
       });
       this.edges = newEdges;
-
-      this.isEulerian = "";
-      this.areEdgesLabeled = false;
-
-      this.notify();
     }
+    this.areEdgesLabeled = false;
+    this.notify();
   };
 
   loadFromPreset = (
@@ -158,7 +153,9 @@ class Graph {
 
   addEdge = (vertex1Id: string, vertex2Id: string) => {
     const existingEdge = Object.values(this.edges).find(
-      (e) => e.vertex1Id === vertex1Id && e.vertex2Id === vertex2Id,
+      (e) =>
+        (e.vertex1Id === vertex1Id && e.vertex2Id === vertex2Id) ||
+        (e.vertex2Id === vertex1Id && e.vertex1Id === vertex2Id),
     );
     if (existingEdge != null) return;
     const id = Date.now().toString();
@@ -269,7 +266,18 @@ class Graph {
     console.log(Action.DELETE_VERTEX);
   };
 
+  getIsEulerian = () => {
+    this.findEulerCircuit();
+    return this.isEulerian;
+  };
+
   findEulerCircuit = () => {
+    if (Object.keys(this.vertices).length === 0) {
+      this.isEulerian = EulerianStatus.EMPTY_GRAPH;
+      this.areEdgesLabeled = true;
+      this.notify();
+      return;
+    }
     let adj = new Map<string, string[]>();
     const edgeIdByVertices = new Map<string, string>();
     Object.values(this.vertices).forEach((vertex) => {
@@ -296,16 +304,16 @@ class Graph {
     }
     switch (oddVertices.length) {
       case 0:
-        this.isEulerian = this.EULERIAN;
+        this.isEulerian = EulerianStatus.EULERIAN;
         this.notify();
         break;
       case 2:
-        this.isEulerian = this.SEMI_EULERIAN;
+        this.isEulerian = EulerianStatus.SEMI_EULERIAN;
         startVertex = oddVertices[0];
         this.notify();
         break;
       default:
-        this.isEulerian = this.NON_EULERIAN;
+        this.isEulerian = EulerianStatus.NON_EULERIAN;
         this.areEdgesLabeled = true;
         this.notify();
         return;
@@ -336,7 +344,7 @@ class Graph {
       }
     }
     if (circuit.length !== Object.keys(this.edges).length + 1) {
-      this.isEulerian = this.NON_EULERIAN;
+      this.isEulerian = EulerianStatus.NON_EULERIAN;
       this.areEdgesLabeled = true;
       this.notify();
       return;

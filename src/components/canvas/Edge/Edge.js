@@ -49,14 +49,16 @@ export default function Edge({ x1, y1, x2, y2, id, onEdgeClick, label }) {
           x2={x2}
           y2={y2}
         />
-        <line
-          className="arrow-line"
-          x1={x1}
-          y1={y1}
-          x2={x1 + arrowTipDeltaX}
-          y2={y1 + arrowTipDeltaY}
-          markerEnd={label == "" ? undefined : "url(#arrowhead)"} // attach an arrow head only if labels are set
-        />
+        {label == "" ? undefined : (
+          <line
+            className="arrow-line"
+            x1={x1}
+            y1={y1}
+            x2={x1 + arrowTipDeltaX}
+            y2={y1 + arrowTipDeltaY}
+            markerEnd="url(#arrowhead)"
+          />
+        )}
       </g>
       <defs>
         <marker

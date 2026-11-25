@@ -17,6 +17,7 @@ import InfoButton from "./components/ui/InfoButton.js";
 import "./components/ui/text-container.css";
 import "./index.css";
 import GraphPresetButton from "./components/ui/GraphPresetButton.js";
+import { EulerianStatus } from "./graph/types.ts";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -130,7 +131,7 @@ export default function GraphContainer() {
           ))}
         </svg>
       </div>
-      {isEulerian && (
+      {isEulerian != EulerianStatus.UNDETERMINED && (
         <div
           onClick={graph.clearEdgeLabels}
           onContextMenu={handleRightClick}

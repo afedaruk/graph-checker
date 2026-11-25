@@ -6,3 +6,11 @@ export enum Action {
   DELETE_EDGE = "DELETE_EDGE",
   CLEAR_GRAPH = "CLEAR_GRAPH",
 }
+
+export enum EulerianStatus {
+  EULERIAN = "eulerian",
+  SEMI_EULERIAN = "semi-eulerian",
+  NON_EULERIAN = "non-eulerian",
+  EMPTY_GRAPH = "graph is empty",
+  UNDETERMINED = "",
+}
