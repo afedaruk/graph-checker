@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/graph-checker/static/css/main.577bff34.css",
-    "main.js": "/graph-checker/static/js/main.b51791a6.js",
+    "main.js": "/graph-checker/static/js/main.ca1f6d5a.js",
     "index.html": "/graph-checker/index.html",
     "main.577bff34.css.map": "/graph-checker/static/css/main.577bff34.css.map",
-    "main.b51791a6.js.map": "/graph-checker/static/js/main.b51791a6.js.map"
+    "main.ca1f6d5a.js.map": "/graph-checker/static/js/main.ca1f6d5a.js.map"
   },
   "entrypoints": [
     "static/css/main.577bff34.css",
-    "static/js/main.b51791a6.js"
+    "static/js/main.ca1f6d5a.js"
   ]
 }
